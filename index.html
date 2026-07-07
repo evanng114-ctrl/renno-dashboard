@@ -107,6 +107,11 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
 .ad-livedot{width:8px;height:8px;border-radius:50%;background:var(--ad-orange);animation:ad-pulse 2s infinite}
 @keyframes ad-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,138,61,.5)}70%{box-shadow:0 0 0 7px rgba(255,138,61,0)}}
 .ad-stats{color:var(--ad-faint);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px;letter-spacing:.02em}
+.ad-userwrap{display:inline-flex;align-items:center;gap:6px;color:var(--ad-muted)}
+.ad-user{appearance:none;-webkit-appearance:none;font:inherit;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px;font-weight:600;color:var(--ad-text);background:var(--ad-surface2);border:1px solid var(--ad-border2);border-radius:8px;padding:3px 24px 3px 10px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23ff8a3d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;transition:border-color .15s}
+.ad-user:hover{border-color:var(--ad-orange)}
+.ad-user:focus-visible{outline:2px solid var(--ad-orange);outline-offset:2px}
+.ad-user option{background:#171c26;color:var(--ad-text)}
 
 .ad-body{position:relative;z-index:1;display:flex;align-items:flex-start;gap:36px}
 .ad-left{flex:1;min-width:0}
@@ -564,15 +569,34 @@ const REFRESH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 let DATA, AGENTS, TODAY;
 const featIdx = {};
 
-// Which day of the Attract→Trust→Sell arc is today? Cycles the plan so it always
-// resolves, even weeks after the data was generated.
-function computeToday() {
+// Two people run the content — Evan and Ali. Their schedules are OFFSET so they're
+// never on the same content type the same day (the plan is A,A,A,T,T,S; offset 3
+// guarantees no phase ever collides). Switch between them with the header dropdown.
+const USERS = { evan: { name: 'Evan', offset: 0 }, ali: { name: 'Ali', offset: 3 } };
+let currentUser = 'evan';
+
+// Which day of the Attract→Trust→Sell arc is it for a given user? Cycles the plan
+// (plus that user's offset) so it always resolves, even weeks later.
+function phaseForUser(userId) {
   const cal = AGENTS.planner.calendar;
   const start = new Date((AGENTS.planner.planStartDate || cal[0].date) + 'T00:00:00');
   const now = new Date(); now.setHours(0, 0, 0, 0);
   const days = Math.round((now - start) / 86400000);
-  const idx = ((days % cal.length) + cal.length) % cal.length;
+  const off = (USERS[userId] || USERS.evan).offset;
+  const idx = (((days + off) % cal.length) + cal.length) % cal.length;
   return { entry: cal[idx], phase: cal[idx].phase, idx };
+}
+function computeToday() { return phaseForUser(currentUser); }
+
+function switchUser(id) {
+  if (!USERS[id] || id === currentUser) return;
+  currentUser = id;
+  TODAY = computeToday();
+  const drill = $('#drill');
+  drill.hidden = true; drill.dataset.open = '';
+  document.querySelectorAll('.agent').forEach((c) => c.setAttribute('aria-expanded', 'false'));
+  renderGreeting();
+  renderAgents();
 }
 
 init();
@@ -641,6 +665,10 @@ function renderGreeting() {
               <span class="ad-row-arrow">↗</span>
             </a>`).join('');
 
+  const otherId = Object.keys(USERS).find((id) => id !== currentUser);
+  const otherName = otherId ? USERS[otherId].name : '';
+  const otherPhase = otherId ? phaseForUser(otherId).phase : '';
+
   const g = $('#greeting');
   g.hidden = false;
   g.innerHTML = `
@@ -651,8 +679,14 @@ function renderGreeting() {
         <span class="ad-brand">Renno</span>
         <span class="ad-dot-sep">·</span>
         <span class="ad-handle">@renno.run</span>
+        <span class="ad-dot-sep">·</span>
+        <label class="ad-userwrap">viewing
+          <select class="ad-user" id="ad-user" aria-label="Switch content owner">
+            ${Object.entries(USERS).map(([id, u]) => `<option value="${id}"${id === currentUser ? ' selected' : ''}>${esc(u.name)}</option>`).join('')}
+          </select>
+        </label>
       </div>
-      <div class="ad-stats">updated ${esc(updated)} · watching ${DATA.competitors.length} rivals</div>
+      <div class="ad-stats">updated ${esc(updated)}${otherId ? ` · ${esc(otherName)}: ${esc(otherPhase)} today` : ''}</div>
     </div>
     <div class="ad-body">
       <div class="ad-left">
@@ -681,6 +715,8 @@ function renderGreeting() {
   </header>`;
 
   $('#ad-reel').addEventListener('click', (e) => { e.preventDefault(); openDrill(hasDraft ? 'hookScript' : 'planner'); });
+  const userSel = $('#ad-user');
+  if (userSel) userSel.addEventListener('change', (e) => switchUser(e.target.value));
   if (allInspos.length > 3) {
     let off = 0;
     $('#ad-inspo-refresh').addEventListener('click', () => {
