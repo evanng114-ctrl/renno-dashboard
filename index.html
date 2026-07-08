@@ -453,9 +453,10 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
    the dashboard. Rendered by panelIdeator() in app.js, wired to the real
    scraped byPhase reels. Values are 1:1 with the design spec.
    ============================================================================ */
+.drill.drill--bare { background: none; border: 0; box-shadow: none; }
 .drill.drill--bare .drill-head { display: none; }
 .drill.drill--bare .drill-body { padding: 0; }
-.drill.drill--bare .chat { max-width: 1060px; margin: 14px auto 0; }
+.drill.drill--bare .chat { max-width: none; margin: 14px 0 0; }
 
 .idf-scope {
   --idf-surface: #10141b; --idf-surface2: #161c26; --idf-surface2h: #1d2431;
@@ -465,7 +466,7 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
   --idf-otint: rgba(255,138,61,.12); --idf-oline: rgba(255,138,61,.4);
   font-family: 'Archivo', system-ui, sans-serif;
 }
-.idf-panel { position: relative; overflow: hidden; max-width: 1060px; margin: 0 auto; background: var(--idf-surface); border: 1px solid var(--idf-line); border-radius: 22px; padding: 26px 28px 32px; }
+.idf-panel { position: relative; overflow: hidden; max-width: none; margin: 0; background: var(--idf-surface); border: 1px solid var(--idf-line); border-radius: 22px; padding: 26px 28px 32px; }
 .idf-glow { position: absolute; top: -120px; right: -80px; width: 520px; height: 340px; background: radial-gradient(ellipse, rgba(255,138,61,.08), transparent 70%); filter: blur(20px); pointer-events: none; }
 
 .idf-topbar { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
