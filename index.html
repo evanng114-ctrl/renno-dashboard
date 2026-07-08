@@ -447,6 +447,103 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
   .perf-bar { height: var(--h, 40%) !important; }
 }
 
+/* ============================================================================
+   Ideator "Idea Feed" drill (Attract-day redesign handoff). All selectors are
+   namespaced .idf-* and all tokens --idf-* so nothing collides with the rest of
+   the dashboard. Rendered by panelIdeator() in app.js, wired to the real
+   scraped byPhase reels. Values are 1:1 with the design spec.
+   ============================================================================ */
+.drill.drill--bare .drill-head { display: none; }
+.drill.drill--bare .drill-body { padding: 0; }
+.drill.drill--bare .chat { max-width: 1060px; margin: 14px auto 0; }
+
+.idf-scope {
+  --idf-surface: #10141b; --idf-surface2: #161c26; --idf-surface2h: #1d2431;
+  --idf-line: rgba(255,255,255,.07); --idf-line2: rgba(255,255,255,.14);
+  --idf-text: #f3f6fb; --idf-muted: #98a2b3; --idf-faint: #6a7482;
+  --idf-orange: #ff8a3d; --idf-orange2: #ffb072; --idf-blue: #4d86f7; --idf-blue2: #7aa5ff;
+  --idf-otint: rgba(255,138,61,.12); --idf-oline: rgba(255,138,61,.4);
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+.idf-panel { position: relative; overflow: hidden; max-width: 1060px; margin: 0 auto; background: var(--idf-surface); border: 1px solid var(--idf-line); border-radius: 22px; padding: 26px 28px 32px; }
+.idf-glow { position: absolute; top: -120px; right: -80px; width: 520px; height: 340px; background: radial-gradient(ellipse, rgba(255,138,61,.08), transparent 70%); filter: blur(20px); pointer-events: none; }
+
+.idf-topbar { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.idf-back { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--idf-muted); background: none; border: 0; cursor: pointer; font-family: inherit; }
+.idf-back:hover { color: var(--idf-text); }
+.idf-x { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--idf-line); background: none; color: var(--idf-faint); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; }
+.idf-x:hover { color: var(--idf-text); border-color: var(--idf-line2); }
+
+.idf-hero { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+.idf-heroL { display: flex; align-items: center; gap: 15px; min-width: 0; }
+.idf-avatar { width: 52px; height: 52px; flex-shrink: 0; border-radius: 14px; background: var(--idf-otint); border: 1px solid var(--idf-oline); display: flex; align-items: center; justify-content: center; color: var(--idf-orange2); }
+.idf-title { font-size: 25px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; color: var(--idf-text); }
+.idf-sub { margin-top: 6px; font-size: 13.5px; color: var(--idf-muted); line-height: 1.4; }
+.idf-refbtn { display: flex; align-items: center; gap: 9px; flex-shrink: 0; font-size: 13.5px; font-weight: 700; color: #0a0d12; background: var(--idf-orange); border: 0; border-radius: 12px; padding: 11px 17px; cursor: pointer; font-family: inherit; transition: .15s; }
+.idf-refbtn:hover { background: var(--idf-orange2); }
+.idf-refbtn.busy { background: var(--idf-surface2); color: var(--idf-muted); border: 1px solid var(--idf-line2); cursor: default; }
+.idf-reficon { display: flex; }
+.idf-reficon.spin { animation: idf-spin .7s linear infinite; }
+@keyframes idf-spin { to { transform: rotate(360deg); } }
+
+.idf-ctx { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--idf-line); }
+.idf-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.idf-chip { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--idf-line); color: var(--idf-muted); background: var(--idf-surface2); cursor: pointer; font-family: inherit; transition: .14s; }
+.idf-chip:hover { border-color: var(--idf-line2); color: var(--idf-text); }
+.idf-chip.on { color: var(--idf-text); border-color: var(--idf-line2); background: var(--idf-surface2h); }
+.idf-cdot { width: 6px; height: 6px; border-radius: 50%; background: var(--idf-orange); }
+.idf-cinfo { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: .03em; color: var(--idf-faint); }
+.idf-cinfo.scanning { color: var(--idf-orange2); }
+
+.idf-results { display: flex; flex-direction: column; gap: 9px; }
+.idf-ra { animation: idf-fade .42s ease; }
+.idf-rb { animation: idf-fade2 .42s ease; }
+@keyframes idf-fade { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+@keyframes idf-fade2 { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+
+.idf-idea { display: flex; gap: 15px; background: var(--idf-surface2); border: 1px solid var(--idf-line); border-radius: 15px; padding: 12px 14px; transition: border-color .15s, transform .15s; }
+.idf-idea:hover { border-color: var(--idf-line2); transform: translateY(-2px); }
+.idf-thumb { position: relative; width: 106px; height: 74px; flex-shrink: 0; border-radius: 11px; border: 1px solid var(--idf-line2); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+.idf-thumb-attract { background: linear-gradient(135deg, #1a2740, #12161f); }
+.idf-thumb-trust { background: linear-gradient(135deg, #242b37, #12161f); }
+.idf-thumb-sell { background: linear-gradient(135deg, #3a2716, #12161f); }
+.idf-play { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center; color: #fff; padding-left: 2px; }
+.idf-dur { position: absolute; right: 6px; bottom: 6px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #e4eaf2; background: rgba(0,0,0,.62); border-radius: 4px; padding: 1px 5px; }
+.idf-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.idf-itop { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.idf-ititle { font-size: 16px; font-weight: 700; line-height: 1.3; letter-spacing: -.01em; color: var(--idf-text); }
+.idf-likes { display: flex; align-items: center; gap: 5px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--idf-muted); }
+.idf-heart { color: var(--idf-orange2); font-size: 12px; }
+.idf-imeta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.idf-tags { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; min-width: 0; }
+.idf-arc { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+.idf-arc-attract { color: #9cc0ff; background: rgba(77,134,247,.14); border: 1px solid rgba(77,134,247,.32); }
+.idf-arc-trust { color: #c7d0dc; background: rgba(255,255,255,.06); border: 1px solid var(--idf-line2); }
+.idf-arc-sell { color: var(--idf-orange2); background: var(--idf-otint); border: 1px solid var(--idf-oline); }
+.idf-type { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; color: var(--idf-faint); background: rgba(255,255,255,.04); border: 1px solid var(--idf-line); }
+.idf-src { font-size: 12.5px; color: var(--idf-faint); }
+.idf-src a { color: var(--idf-blue); }
+.idf-src a:hover { color: var(--idf-blue2); }
+.idf-usebtn { display: flex; align-items: center; gap: 7px; flex-shrink: 0; font-size: 12.5px; font-weight: 600; color: var(--idf-text); background: none; border: 1px solid var(--idf-line2); border-radius: 9px; padding: 7px 13px; cursor: pointer; font-family: inherit; transition: .14s; }
+.idf-usebtn:hover { border-color: var(--idf-orange); color: var(--idf-orange2); }
+.idf-arr { transition: transform .15s; }
+.idf-usebtn:hover .idf-arr { transform: translateX(3px); }
+.idf-angle { display: flex; gap: 11px; background: var(--idf-surface); border: 1px solid var(--idf-line); border-left: 2px solid var(--idf-oline); border-radius: 9px; padding: 8px 12px; }
+.idf-anglelabel { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--idf-orange2); flex-shrink: 0; padding-top: 3px; width: 56px; }
+.idf-angletext { font-size: 13px; color: #c3ccd8; line-height: 1.45; }
+
+.idf-skel { display: flex; gap: 16px; background: var(--idf-surface2); border: 1px solid var(--idf-line); border-radius: 15px; padding: 15px; }
+.idf-skthumb { width: 106px; height: 74px; border-radius: 11px; flex-shrink: 0; }
+.idf-skbody { flex: 1; display: flex; flex-direction: column; gap: 11px; padding-top: 3px; }
+.idf-skline { height: 12px; border-radius: 6px; }
+.idf-shimmer { background: linear-gradient(90deg, rgba(255,255,255,.035), rgba(255,255,255,.11), rgba(255,255,255,.035)); background-size: 200% 100%; animation: idf-sh 1.25s linear infinite; }
+@keyframes idf-sh { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@media (max-width: 520px) {
+  .idf-idea { flex-direction: column; }
+  .idf-thumb { width: 100%; height: 150px; }
+}
+
 </style>
 </head>
 <body>
@@ -952,6 +1049,9 @@ function renderTop() {
 /* ---------------- chat with an agent ---------------- */
 
 const CHATTABLE = { ideator: 1, hookScript: 1, planner: 1, analyst: 1, dmManager: 1 };
+// Panels that render their own full chrome (topbar + close), so the generic
+// drill header is hidden and the panel renders before the chat box.
+const FEED_PANELS = { ideator: 1 };
 const chatHistory = {}; // agentKey -> [{role, content}]
 let chatStatus = null; // {ready, model}
 const STARTERS = {
@@ -1059,22 +1159,29 @@ function openDrill(key) {
   const panel = PANELS[key];
   const already = drill.dataset.open === key && !drill.hidden;
   document.querySelectorAll('.agent').forEach((c) => c.setAttribute('aria-expanded', String(c.dataset.panel === key && !already)));
-  if (already) { drill.hidden = true; drill.dataset.open = ''; return; }
+  if (already) { closeDrill(); return; }
+  const bare = !!FEED_PANELS[key]; // panel draws its own header (Ideator feed)
+  drill.classList.toggle('drill--bare', bare);
   drill.dataset.open = key;
   drill.hidden = false;
   $('#drill-title').textContent = panel.title;
   const body = $('#drill-body');
   body.innerHTML = '';
-  if (CHATTABLE[key] && !window.__SHARED__) renderChat(body, key);
-  panel.render(body);
+  const withChat = () => { if (CHATTABLE[key] && !window.__SHARED__) renderChat(body, key); };
+  if (bare) { panel.render(body); withChat(); } // feed first, chat below it
+  else { withChat(); panel.render(body); }
   drill.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
 }
 
-$('#drill-close').addEventListener('click', () => {
-  $('#drill').hidden = true;
-  $('#drill').dataset.open = '';
+function closeDrill() {
+  const drill = $('#drill');
+  drill.hidden = true;
+  drill.dataset.open = '';
+  drill.classList.remove('drill--bare');
   document.querySelectorAll('.agent').forEach((c) => c.setAttribute('aria-expanded', 'false'));
-});
+}
+
+$('#drill-close').addEventListener('click', closeDrill);
 
 function table(headers, rows) {
   const t = el('table', 'tbl');
@@ -1100,27 +1207,168 @@ function panelPosts(body) {
   ));
 }
 
+// Ideator "Idea Feed" (Attract-day redesign handoff), wired to the real scraped
+// reels. The pool is every byPhase reel flattened (arc = its funnel phase); the
+// default filter + today-dot follow the current user's actual phase. Refresh
+// re-shuffles a fresh slice of the real pool behind a brief "scanning" state.
+const IDF_ARCS = { attract: 'Attract', trust: 'Trust', sell: 'Sell' };
+const IDF_PLAY = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const IDF_REFRESH = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+const IDF_BULB = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5C17.7 10.2 18 9 18 8c0-3.3-2.7-6-6-6S6 4.7 6 8c0 1 .3 2.2 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>';
+
+// Deterministic seeded shuffle: same seed => same order (stable per seed).
+function idfShuffle(arr, seed) {
+  const a = arr.slice();
+  let s = seed * 9301 + 49297;
+  for (let k = a.length - 1; k > 0; k--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (k + 1));
+    const t = a[k]; a[k] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
 function panelIdeator(body) {
   const order = AGENTS.ideator.phaseOrder || ['attract', 'trust', 'sell'];
-  const todayPh = TODAY.phase.toLowerCase();
-  const ordered = [todayPh, ...order.filter((p) => p !== todayPh)];
-  body.appendChild(el('div', 'drill-note', `Real competitor videos, scraped and sorted by the kind of day they fit. <strong>Today is an ${esc(TODAY.phase)} day</strong>. Start with that row.`));
-  for (const ph of ordered) {
-    const list = AGENTS.ideator.byPhase[ph] || [];
-    const head = el('h4');
-    head.innerHTML = `<span class="phase ${ph}">${cap(ph)}</span> ${ph === todayPh ? '<span class="today-badge">Today</span>' : ''} <span style="color:var(--faint);font-weight:400">· ${list.length} idea${list.length === 1 ? '' : 's'}</span>`;
-    body.appendChild(head);
-    for (const idea of list) {
-      const d = el('div', 'idea');
-      const insp = idea.inspiration;
-      const metric = insp && insp.views != null ? `${fmt(insp.views)} views` : insp && insp.likes != null ? `${fmt(insp.likes)} likes` : 'watch ↗';
-      const src = idea.source === 'format' || !insp
-        ? `<span class="src-tag">suggested format · competitors rarely post this, so it's open space for you</span>`
-        : `inspired by <a href="${esc(insp.url)}" target="_blank" rel="noopener">@${esc(insp.handle)} · ${metric} ↗</a>`;
-      d.innerHTML = `<div class="idea-top">${idea.sub ? `<span class="lane">${esc(idea.sub)}</span>` : ''}<span class="idea-title">${esc(idea.title)}</span></div><div class="idea-angle">${esc(idea.angle)}</div><div class="idea-src">${src}</div>`;
-      body.appendChild(d);
+  const todayArc = TODAY.phase.toLowerCase();
+
+  // POOL = the real scraped reels, flattened across phases (arc = funnel phase).
+  const pool = [];
+  for (const ph of order) {
+    for (const idea of (AGENTS.ideator.byPhase[ph] || [])) {
+      const insp = idea.inspiration || {};
+      pool.push({
+        id: idea.id, arc: ph,
+        handle: insp.handle || '', url: insp.url || '',
+        likes: typeof insp.likes === 'number' ? insp.likes : null,
+        title: idea.title, angle: idea.angle,
+        type: idea.sub ? cap(idea.sub) : 'Reel',
+      });
     }
   }
+
+  const PER = (f) => (f === 'all' ? 6 : 5);          // reels shown at once
+  const st = { filter: todayArc, seed: 1, loading: false };
+  let par = 0;                                        // flips each render to replay fade-in
+
+  const ideaHTML = (x) => `
+    <div class="idf-idea">
+      <div class="idf-thumb idf-thumb-${x.arc}" data-url="${esc(x.url)}" role="link" title="Open the reel">
+        <span class="idf-play">${IDF_PLAY}</span>
+      </div>
+      <div class="idf-body">
+        <div class="idf-itop">
+          <div class="idf-ititle">${esc(x.title)}</div>
+          ${x.likes != null ? `<div class="idf-likes"><span class="idf-heart">&#9829;</span>${x.likes.toLocaleString('en-US')}</div>` : ''}
+        </div>
+        <div class="idf-imeta">
+          <div class="idf-tags">
+            <span class="idf-arc idf-arc-${x.arc}">${IDF_ARCS[x.arc]}</span>
+            <span class="idf-type">${esc(x.type)}</span>
+            ${x.handle ? `<span class="idf-src">inspired by <a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">@${esc(x.handle)}</a> &#8599;</span>` : ''}
+          </div>
+          <button class="idf-usebtn" type="button" data-draft="1">Draft this <span class="idf-arr">&#8594;</span></button>
+        </div>
+        <div class="idf-angle"><span class="idf-anglelabel">Your angle</span><span class="idf-angletext">${esc(x.angle)}</span></div>
+      </div>
+    </div>`;
+
+  const skelHTML = () => {
+    const w1 = 60 + Math.round(Math.random() * 15);
+    const w2 = 28 + Math.round(Math.random() * 10);
+    const w3 = 85 + Math.round(Math.random() * 8);
+    return `<div class="idf-skel"><div class="idf-skthumb idf-shimmer"></div><div class="idf-skbody">`
+      + `<div class="idf-skline idf-shimmer" style="width:${w1}%"></div>`
+      + `<div class="idf-skline idf-shimmer" style="width:${w2}%"></div>`
+      + `<div class="idf-skline idf-shimmer" style="width:${w3}%;height:32px"></div></div></div>`;
+  };
+
+  const root = el('div', 'idf-scope');
+  root.innerHTML = `
+    <div class="idf-panel">
+      <div class="idf-glow"></div>
+      <div class="idf-topbar">
+        <button class="idf-back" type="button">&#8592; Your agent team</button>
+        <button class="idf-x" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="idf-hero">
+        <div class="idf-heroL">
+          <div class="idf-avatar">${IDF_BULB}</div>
+          <div>
+            <div class="idf-title">Ideator</div>
+            <div class="idf-sub">Competitor reels, scraped and sorted by the kind of day they fit.</div>
+          </div>
+        </div>
+        <button class="idf-refbtn" type="button">
+          <span class="idf-reficon">${IDF_REFRESH}</span>
+          <span class="idf-reflabel">New ideas</span>
+        </button>
+      </div>
+      <div class="idf-ctx">
+        <div class="idf-chips">
+          ${['all', 'attract', 'trust', 'sell'].map((a) => `<button class="idf-chip" data-arc="${a}" type="button">${a === todayArc ? '<span class="idf-cdot" title="today"></span>' : ''}${a === 'all' ? 'All' : IDF_ARCS[a]}</button>`).join('')}
+        </div>
+        <div class="idf-cinfo"></div>
+      </div>
+      <div class="idf-results"></div>
+    </div>`;
+  body.appendChild(root);
+
+  const list = root.querySelector('.idf-results');
+  const count = root.querySelector('.idf-cinfo');
+  const refBtn = root.querySelector('.idf-refbtn');
+
+  function render() {
+    root.querySelectorAll('.idf-chip').forEach((c) => c.classList.toggle('on', c.dataset.arc === st.filter));
+    if (st.loading) {
+      list.className = 'idf-results';
+      list.innerHTML = skelHTML().repeat(4);
+      count.textContent = 'Scanning competitors…';
+      count.classList.add('scanning');
+      refBtn.classList.add('busy');
+      refBtn.querySelector('.idf-reficon').classList.add('spin');
+      refBtn.querySelector('.idf-reflabel').textContent = 'Scanning…';
+      return;
+    }
+    const filtered = st.filter === 'all' ? pool : pool.filter((x) => x.arc === st.filter);
+    const shown = idfShuffle(filtered, st.seed).slice(0, PER(st.filter));
+    par ^= 1;
+    list.className = 'idf-results ' + (par ? 'idf-ra' : 'idf-rb');
+    list.innerHTML = shown.map(ideaHTML).join('');
+    const arcWord = st.filter === 'all' ? '' : IDF_ARCS[st.filter] + ' ';
+    count.textContent = `${filtered.length} ${arcWord}ideas · showing ${shown.length}`;
+    count.classList.remove('scanning');
+    refBtn.classList.remove('busy');
+    refBtn.querySelector('.idf-reficon').classList.remove('spin');
+    refBtn.querySelector('.idf-reflabel').textContent = 'New ideas';
+  }
+
+  function refresh() {
+    if (st.loading) return;
+    st.loading = true;
+    render();
+    // Point this at a real re-scrape; for now it surfaces a fresh slice of the
+    // already-scraped pool so a genuinely different set of real reels appears.
+    setTimeout(() => { st.loading = false; st.seed++; render(); }, 780);
+  }
+
+  refBtn.addEventListener('click', refresh);
+  root.querySelectorAll('.idf-chip').forEach((c) => c.addEventListener('click', () => {
+    if (c.dataset.arc === st.filter) return;
+    st.filter = c.dataset.arc;
+    render();
+  }));
+  root.querySelector('.idf-back').addEventListener('click', closeDrill);
+  root.querySelector('.idf-x').addEventListener('click', closeDrill);
+  // card actions (delegated, since the list re-renders on every refresh/filter)
+  list.addEventListener('click', (e) => {
+    if (e.target.closest('.idf-usebtn')) { openDrill('hookScript'); return; }
+    if (e.target.closest('.idf-src')) return; // let the source link navigate
+    const thumb = e.target.closest('.idf-thumb');
+    if (thumb && thumb.dataset.url) window.open(thumb.dataset.url, '_blank', 'noopener');
+  });
+
+  render();
 }
 
 function panelScripts(body) {
