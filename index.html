@@ -634,6 +634,59 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
 @keyframes hs-sh { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @media (max-width: 560px) { .hs-stage { grid-template-columns: 16px 52px 1fr; gap: 10px; } }
 
+/* ============================================================================
+   Planner "week view" drill (redesign handoff): a boxless arc overview. Only the
+   panel is a bordered box; days are open columns with an arc-color bar + big date
+   + arc label. Namespaced .pl-* / --pl-*. Full-width to match the other feeds.
+   ============================================================================ */
+.pl-scope {
+  --pl-surface: #10141b; --pl-surface2: #161c26;
+  --pl-line: rgba(255,255,255,.07); --pl-line2: rgba(255,255,255,.14);
+  --pl-text: #f3f6fb; --pl-muted: #98a2b3; --pl-faint: #6a7482;
+  --pl-orange: #ff8a3d; --pl-orange2: #ffb072; --pl-blue: #4d86f7; --pl-blue2: #7aa5ff;
+  --pl-otint: rgba(255,138,61,.12); --pl-oline: rgba(255,138,61,.4);
+  --pl-atxt: #9cc0ff; --pl-ttxt: #c7d0dc; --pl-strust: #8a97a8;
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+.pl-panel { position: relative; overflow: hidden; max-width: none; margin: 0; background: var(--pl-surface); border: 1px solid var(--pl-line); border-radius: 24px; padding: 28px 40px 44px; }
+.pl-glow { position: absolute; top: -140px; left: 6%; width: 680px; height: 380px; background: radial-gradient(ellipse, rgba(255,138,61,.06), transparent 70%); filter: blur(22px); pointer-events: none; }
+.pl-topbar { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.pl-back { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--pl-muted); background: none; border: 0; cursor: pointer; font-family: inherit; }
+.pl-back:hover { color: var(--pl-text); }
+.pl-x { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--pl-line); background: none; color: var(--pl-faint); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; }
+.pl-x:hover { color: var(--pl-text); border-color: var(--pl-line2); }
+.pl-hero { position: relative; display: flex; align-items: center; gap: 16px; margin-bottom: 30px; }
+.pl-avatar { width: 52px; height: 52px; flex-shrink: 0; border-radius: 14px; background: var(--pl-otint); border: 1px solid var(--pl-oline); display: flex; align-items: center; justify-content: center; color: var(--pl-orange2); }
+.pl-title { font-size: 26px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; color: var(--pl-text); }
+.pl-sub { margin-top: 6px; font-size: 13.5px; color: var(--pl-muted); line-height: 1.4; }
+.pl-railtop { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 34px; }
+.pl-monthblock { display: flex; align-items: baseline; gap: 13px; }
+.pl-month { font-size: 22px; font-weight: 800; letter-spacing: -.025em; color: var(--pl-text); }
+.pl-range { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .04em; color: var(--pl-faint); }
+.pl-legend { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.pl-leg { display: flex; align-items: center; gap: 9px; }
+.pl-legdot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.pl-legname { font-size: 13px; font-weight: 700; letter-spacing: .01em; }
+.pl-legmean { font-size: 12.5px; color: var(--pl-faint); }
+.pl-bg-attract { background: var(--pl-blue); }
+.pl-bg-trust { background: var(--pl-strust); }
+.pl-bg-sell { background: var(--pl-orange); }
+.pl-tx-attract { color: var(--pl-atxt); }
+.pl-tx-trust { color: var(--pl-ttxt); }
+.pl-tx-sell { color: var(--pl-orange2); }
+.pl-week { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 34px; }
+.pl-day { position: relative; display: flex; flex-direction: column; }
+.pl-bar { height: 6px; border-radius: 4px; width: 100%; margin-bottom: 20px; transition: height .16s, margin-bottom .16s; }
+.pl-day:hover .pl-bar { height: 11px; margin-bottom: 15px; }
+.pl-dhead { display: flex; flex-direction: column; align-items: flex-start; min-height: 80px; }
+.pl-dwd { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--pl-faint); margin-bottom: 9px; }
+.pl-dnum { font-size: 36px; font-weight: 800; letter-spacing: -.035em; line-height: .9; color: var(--pl-text); }
+.pl-day.today .pl-dnum { color: var(--pl-orange); }
+.pl-todaylabel { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--pl-orange2); margin-top: 10px; }
+.pl-darc { font-size: 15px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-top: 22px; }
+@media (max-width: 1080px) { .pl-week { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 34px 30px; } }
+@media (max-width: 660px) { .pl-week { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
 </style>
 </head>
 <body>
@@ -1141,7 +1194,7 @@ function renderTop() {
 const CHATTABLE = { ideator: 1, hookScript: 1, planner: 1, analyst: 1, dmManager: 1 };
 // Panels that render their own full chrome (topbar + close), so the generic
 // drill header is hidden and the panel renders before the chat box.
-const FEED_PANELS = { ideator: 1, hookScript: 1 };
+const FEED_PANELS = { ideator: 1, hookScript: 1, planner: 1 };
 const chatHistory = {}; // agentKey -> [{role, content}]
 let chatStatus = null; // {ready, model}
 const STARTERS = {
@@ -1582,38 +1635,60 @@ function panelScripts(body) {
   render();
 }
 
+// Planner "week view" (redesign handoff): a boxless arc overview. Each day is an
+// open column with an arc-color bar, big editorial date, and the arc label; today
+// is orange. Wired to the current user's real rotated week (no per-day clicks, by
+// design). Titles/times exist in the data but are intentionally not shown here.
 function panelPlanner(body) {
+  const PL_ARCS = { attract: 'Attract', trust: 'Trust', sell: 'Sell' };
+  const PL_CAL = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
   const cal = AGENTS.planner.calendar;
   const len = cal.length;
-  const time = AGENTS.planner.metrics.nextPost.split(' ').slice(1).join(' ');
-  const scriptDays = AGENTS.hookScript.scripts.length;
   const start = TODAY.idx; // this user's plan index for today (offset applied)
   const today0 = new Date(); today0.setHours(0, 0, 0, 0);
-  const monthLabel = today0.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
-  body.appendChild(el('div', 'drill-note',
-    `<strong>${esc(USERS[currentUser].name)}'s week</strong> · a 6-day <span class="phase attract">Attract</span> give value &amp; reach · <span class="phase trust">Trust</span> your story · <span class="phase sell">Sell</span> soft waitlist ask. Best time to post: <strong>${esc(time)}</strong>. Tap a day with a draft to open its script.`));
-  body.appendChild(el('div', 'cal-month', monthLabel));
-
-  const grid = el('div', 'cal');
+  const week = [];
   for (let i = 0; i < len; i++) {
-    const pidx = (start + i) % len;        // rotate the plan to this user's schedule
-    const d = cal[pidx];
+    const d = cal[(start + i) % len];
     const date = new Date(today0); date.setDate(date.getDate() + i);
-    const dow = date.toLocaleDateString('en-GB', { weekday: 'short' });
-    const isToday = i === 0;
-    const hasDraft = pidx < scriptDays;    // scripts exist for the Attract days (plan idx 0-2)
-    const phl = d.phase.toLowerCase();
-    const cell = el('div', 'cal-cell ' + phl + (isToday ? ' today' : '') + (hasDraft ? ' clickable' : ''));
-    cell.innerHTML = `
-      <div class="cal-head"><span class="cal-dow">${esc(dow)}</span><span class="cal-num">${date.getDate()}</span>${isToday ? '<span class="cal-today-badge">Today</span>' : ''}</div>
-      <span class="phase ${phl}">${esc(d.phase)}</span>
-      <div class="cal-title" title="${esc(d.plan)}">${esc(d.title)}</div>
-      <div class="cal-foot"><span class="cal-time">${esc(d.time)}</span>${hasDraft ? '<span class="cal-draft">script →</span>' : ''}</div>`;
-    if (hasDraft) cell.addEventListener('click', () => openDrill('hookScript'));
-    grid.appendChild(cell);
+    week.push({ wd: date.toLocaleDateString('en-US', { weekday: 'short' }), num: date.getDate(), arc: d.phase.toLowerCase(), today: i === 0 });
   }
-  body.appendChild(grid);
+  const month = today0.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const first = week[0], last = week[week.length - 1];
+  const range = `${first.wd} ${first.num} - ${last.wd} ${last.num}`;
+
+  const legend = [
+    { arc: 'attract', mean: 'give value & reach' },
+    { arc: 'trust', mean: 'your story' },
+    { arc: 'sell', mean: 'soft waitlist ask' },
+  ].map((l) => `<div class="pl-leg"><span class="pl-legdot pl-bg-${l.arc}"></span><span class="pl-legname pl-tx-${l.arc}">${PL_ARCS[l.arc]}</span><span class="pl-legmean">${l.mean}</span></div>`).join('');
+
+  const days = week.map((d) => `
+    <div class="pl-day${d.today ? ' today' : ''}">
+      <span class="pl-bar pl-bg-${d.arc}"></span>
+      <div class="pl-dhead">
+        <span class="pl-dwd">${esc(d.wd.toUpperCase())}</span>
+        <span class="pl-dnum">${d.num}</span>
+        ${d.today ? '<span class="pl-todaylabel">Today</span>' : ''}
+      </div>
+      <div class="pl-darc pl-tx-${d.arc}">${PL_ARCS[d.arc] || cap(d.arc)}</div>
+    </div>`).join('');
+
+  const root = el('div', 'pl-scope');
+  root.innerHTML = `
+    <div class="pl-panel">
+      <div class="pl-glow"></div>
+      <div class="pl-topbar"><button class="pl-back" type="button">&#8592; Your agent team</button><button class="pl-x" type="button" aria-label="Close">&#10005;</button></div>
+      <div class="pl-hero"><div class="pl-avatar">${PL_CAL}</div><div><div class="pl-title">Planner</div><div class="pl-sub">${esc(USERS[currentUser].name)}'s week, built around the Attract &#8594; Trust &#8594; Sell arc.</div></div></div>
+      <div class="pl-railtop">
+        <div class="pl-monthblock"><span class="pl-month">${esc(month)}</span><span class="pl-range">${esc(range)}</span></div>
+        <div class="pl-legend">${legend}</div>
+      </div>
+      <div class="pl-week">${days}</div>
+    </div>`;
+  body.appendChild(root);
+  root.querySelector('.pl-back').addEventListener('click', closeDrill);
+  root.querySelector('.pl-x').addEventListener('click', closeDrill);
 }
 
 function panelAnalyst(body) {
