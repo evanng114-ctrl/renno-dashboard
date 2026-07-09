@@ -866,6 +866,9 @@ const fmt = (n) => (n == null ? '·' : n.toLocaleString('en-US'));
 const kfmt = (n) => (n == null ? '·' : n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+// Whole-day index (local midnight) — rotates daily-varying content so each day
+// opens on a different slice instead of always the same first items.
+const daysSinceEpoch = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return Math.round(d.getTime() / 86400000); };
 // House style: no em or en dashes anywhere in the content (a brand + AI-tell
 // preference). Collapse them to commas or hyphens across every scraped and
 // generated string as it loads, so nothing dash-y ever reaches the screen.
@@ -984,6 +987,8 @@ function renderGreeting() {
   for (const v of withUrl) if (!ordered.includes(v)) ordered.push(v); // backfill
   const allInspos = ordered.map((v) => ({ title: cap(v.title.replace(/^@\S+'s\s+/, '')), handle: '@' + v.inspiration.handle, url: v.inspiration.url, sub: v.sub }));
   const threeFrom = (off) => Array.from({ length: Math.min(3, allInspos.length) }, (_, i) => allInspos[(off + i) % allInspos.length]);
+  // Open on a different trio each day (so the same Attract day next cycle differs).
+  const startOff = allInspos.length ? ((daysSinceEpoch() * 3) % allInspos.length) : 0;
   const inspoRowsHTML = (list) => list.map((r) => `<a class="ad-inspo-row" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">
               <span class="ad-play">${PLAY_ICON}</span>
               <div class="ad-inspo-text">
@@ -1036,7 +1041,7 @@ function renderGreeting() {
             <div class="ad-reel-label">Inspo for today’s reel</div>
             ${allInspos.length > 3 ? `<button class="ad-inspo-refresh" id="ad-inspo-refresh" type="button" title="Show 3 more" aria-label="Show 3 more reels">${REFRESH_ICON}</button>` : ''}
           </div>
-          <div class="ad-inspo-rows" id="ad-inspo-rows">${inspoRowsHTML(threeFrom(0))}</div>
+          <div class="ad-inspo-rows" id="ad-inspo-rows">${inspoRowsHTML(threeFrom(startOff))}</div>
         </div>` : ''}
       </div>
     </div>
@@ -1046,7 +1051,7 @@ function renderGreeting() {
   const userSel = $('#ad-user');
   if (userSel) userSel.addEventListener('change', (e) => switchUser(e.target.value));
   if (allInspos.length > 3) {
-    let off = 0;
+    let off = startOff;
     $('#ad-inspo-refresh').addEventListener('click', () => {
       off = (off + 3) % allInspos.length;
       const rows = $('#ad-inspo-rows');
@@ -1410,7 +1415,7 @@ function panelIdeator(body) {
   }
 
   const PER = (f) => (f === 'all' ? 6 : 5);          // reels shown at once
-  const st = { filter: todayArc, seed: 1, loading: false };
+  const st = { filter: todayArc, seed: daysSinceEpoch(), loading: false };
   let par = 0;                                        // flips each render to replay fade-in
 
   const ideaHTML = (x) => `
