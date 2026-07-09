@@ -755,6 +755,78 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
 @media (max-width: 1100px) { .at-team { grid-template-columns: repeat(3, minmax(0,1fr)); } }
 @media (max-width: 680px) { .at-team { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 
+/* ============================================================================
+   Post Performance section (redesign handoff): bottom-of-page analytics panel.
+   Views-trend chart + content-type bars + 4 animated stat cards. Namespaced
+   .pp-* / keyframes pp*. Self-fetches real data and refreshes hourly (app.js).
+   CRITICAL: .pp-hbf / .pp-cmpf are spans and MUST be display:block or their
+   width collapses to 0.
+   ============================================================================ */
+.pp-panel {
+  --pp-surface: #10141b; --pp-surface2: #161c26; --pp-line: rgba(255,255,255,.07); --pp-line2: rgba(255,255,255,.14);
+  --pp-text: #f3f6fb; --pp-muted: #98a2b3; --pp-faint: #6a7482; --pp-blue: #4d86f7; --pp-green: #34d399; --pp-red: #f2708f;
+  margin-top: 16px; background: var(--pp-surface); border: 1px solid var(--pp-line); border-radius: 22px; padding: 26px 28px 28px;
+  font-family: 'Archivo', system-ui, sans-serif; color: var(--pp-text);
+}
+.pp-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.pp-h2 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
+.pp-sub { margin-top: 5px; font-size: 13px; color: var(--pp-muted); }
+.pp-chartrow { display: flex; gap: 12px; margin-top: 18px; }
+.pp-yax { width: 48px; flex-shrink: 0; position: relative; height: 214px; }
+.pp-ytick { position: absolute; right: 0; transform: translateY(-50%); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--pp-faint); white-space: nowrap; }
+.pp-plot { position: relative; flex: 1; height: 214px; }
+.pp-area { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pp-aline { fill: none; stroke: var(--pp-blue); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.pp-pt { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--pp-blue); transform: translate(-50%,-50%); z-index: 3; }
+.pp-pt.pk { width: 12px; height: 12px; background: var(--pp-green); box-shadow: 0 0 0 4px rgba(52,211,153,.2); z-index: 4; }
+.pp-pt.lo { width: 10px; height: 10px; background: var(--pp-red); box-shadow: 0 0 0 4px rgba(242,112,143,.16); }
+.pp-al { position: absolute; z-index: 5; white-space: nowrap; background: #0b0e15; border: 1px solid var(--pp-line2); border-radius: 8px; padding: 5px 9px; }
+.pp-al.pk { transform: translate(-50%,52%); }
+.pp-al.lo { transform: translate(-50%,-165%); }
+.pp-alk { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--pp-faint); }
+.pp-alv { font-size: 12.5px; font-weight: 700; margin-top: 1px; }
+.pp-al.pk .pp-alv { color: var(--pp-green); }
+.pp-al.lo .pp-alv { color: var(--pp-red); }
+.pp-ald { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--pp-faint); }
+.pp-xr { display: flex; justify-content: space-between; margin: 9px 0 0 60px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .03em; color: var(--pp-faint); }
+.pp-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 16px; margin-top: 24px; }
+.pp-card { background: var(--pp-surface2); border: 1px solid var(--pp-line); border-radius: 16px; padding: 18px; }
+.pp-bdt { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
+.pp-bds { font-size: 11.5px; color: var(--pp-faint); margin: 2px 0 16px; }
+.pp-hb { display: flex; align-items: center; gap: 11px; margin-bottom: 11px; }
+.pp-hbl { width: 78px; flex-shrink: 0; font-size: 12px; color: var(--pp-muted); }
+.pp-hbt { flex: 1; height: 24px; border-radius: 6px; background: rgba(255,255,255,.05); position: relative; overflow: hidden; }
+.pp-hbf { display: block; height: 100%; border-radius: 6px; }
+.pp-hbv { position: absolute; right: 9px; top: 0; line-height: 24px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; }
+.pp-stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.pp-st { position: relative; overflow: hidden; background: var(--pp-surface2); border: 1px solid var(--pp-line); border-radius: 14px; padding: 15px; }
+.pp-stl { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--pp-faint); }
+.pp-stv { margin-top: 8px; font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.pp-sts { margin-top: 4px; font-size: 11.5px; color: var(--pp-muted); }
+.pp-wk { display: flex; align-items: flex-end; gap: 4px; height: 24px; margin-top: 13px; }
+.pp-wk i { flex: 1; border-radius: 2px; background: rgba(255,255,255,.09); }
+.pp-wk i.hi { background: var(--pp-blue); animation: ppwkp 2.2s ease-in-out infinite; }
+@keyframes ppwkp { 0%,100% { opacity: .68; } 50% { opacity: 1; } }
+.pp-cmp { margin-top: 13px; display: flex; flex-direction: column; gap: 7px; }
+.pp-cmpr { display: flex; align-items: center; gap: 9px; }
+.pp-cmpk { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--pp-faint); width: 52px; flex-shrink: 0; }
+.pp-cmpt { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,.06); overflow: hidden; }
+.pp-cmpf { display: block; height: 100%; border-radius: 4px; }
+.pp-cmpf.med { background: var(--pp-faint); }
+.pp-cmpf.hook { position: relative; width: 100%; background: var(--pp-blue); }
+.pp-cmpf.hook::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); transform: translateX(-120%); animation: ppsweep 3s ease-in-out 1.4s infinite; }
+@keyframes ppsweep { 0% { transform: translateX(-120%); } 40%,100% { transform: translateX(220%); } }
+.pp-mln { position: relative; height: 6px; margin-top: 15px; border-radius: 3px; background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(77,134,247,.4)); }
+.pp-mmk { position: absolute; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: var(--pp-blue); transform: translate(-50%,-50%); animation: ppmpulse 2s ease-in-out infinite; }
+@keyframes ppmpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(77,134,247,.5); } 50% { box-shadow: 0 0 0 5px rgba(77,134,247,0); } }
+.pp-radar { position: absolute; top: 13px; right: 14px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(77,134,247,.3); overflow: hidden; }
+.pp-radar::before { content: ''; position: absolute; inset: 0; background: conic-gradient(from 0deg, rgba(77,134,247,.6), transparent 110deg); animation: ppradar 2.4s linear infinite; }
+.pp-radar b { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--pp-blue); transform: translate(-50%,-50%); z-index: 1; }
+@keyframes ppradar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pp-wk i.hi, .pp-cmpf.hook::after, .pp-mmk, .pp-radar::before { animation: none; } }
+@media (max-width: 760px) { .pp-grid { grid-template-columns: 1fr; } }
+@media (max-width: 440px) { .pp-stats { grid-template-columns: 1fr; } }
+
 </style>
 </head>
 <body>
@@ -778,19 +850,25 @@ main { max-width: 1680px; margin: 0 auto; padding: 0 28px 48px; }
       <div class="drill-body" id="drill-body"></div>
     </section>
 
-    <section class="lower">
-      <div class="panel" id="perf-panel">
-        <div class="panel-head">
-          <h3>Recent post performance</h3>
-          <button class="panel-link" id="perf-more">all posts →</button>
+    <section class="pp-panel" id="post-performance" aria-live="polite" aria-label="Post performance">
+      <div class="pp-top">
+        <div>
+          <div class="pp-h2">Views trend</div>
+          <div class="pp-sub">Last 12 posts, with your best and weakest flagged</div>
         </div>
-        <div class="perf-chart" id="perf-chart"></div>
       </div>
-      <div class="panel" id="top-panel">
-        <div class="panel-head">
-          <h3>All-time top posts</h3>
+      <div class="pp-chartrow">
+        <div class="pp-yax" id="perf-yax"></div>
+        <div class="pp-plot" id="perf-plot"></div>
+      </div>
+      <div class="pp-xr"><span id="perf-first"></span><span id="perf-last"></span></div>
+      <div class="pp-grid">
+        <div class="pp-card">
+          <div class="pp-bdt">Views by content type</div>
+          <div class="pp-bds">Average views per post</div>
+          <div id="perf-types"></div>
         </div>
-        <ol class="top-list" id="top-list"></ol>
+        <div class="pp-stats" id="perf-stats"></div>
       </div>
     </section>
   </main>
@@ -868,7 +946,7 @@ const fmt = (n) => (n == null ? '·' : n.toLocaleString('en-US'));
 const kfmt = (n) => (n == null ? '·' : n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-// Whole-day index (local midnight) — rotates daily-varying content so each day
+// Whole-day index (local midnight), rotates daily-varying content so each day
 // opens on a different slice instead of always the same first items.
 const daysSinceEpoch = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return Math.round(d.getTime() / 86400000); };
 // House style: no em or en dashes anywhere in the content (a brand + AI-tell
@@ -959,8 +1037,9 @@ async function init() {
   renderGreeting();
   renderStats();
   renderAgents();
-  renderPerf();
-  renderTop();
+  loadPerformance();
+  // Post Performance fetches its own data and refreshes hourly (per the handoff).
+  if (!perfTimer) perfTimer = setInterval(loadPerformance, 60 * 60 * 1000);
 }
 
 /* ---------------- greeting hero ---------------- */
@@ -1174,36 +1253,166 @@ function renderAgents() {
 
 /* ---------------- lower panels ---------------- */
 
-function renderPerf() {
-  const chart = $('#perf-chart');
-  chart.innerHTML = '';
-  const recent = [...DATA.me.posts]
-    .sort((x, y) => new Date(x.timestamp) - new Date(y.timestamp))
-    .slice(-12);
-  const max = Math.max(...recent.map((p) => p.views ?? 0), 1);
-  for (const p of recent) {
-    const col = el('button', 'perf-col');
-    const h = Math.max(6, Math.round(((p.views ?? 0) / max) * 100));
-    const d = new Date(p.timestamp);
-    const peak = (p.views ?? 0) === max;
-    col.title = `${fmt(p.views)} views · ${fmt(p.likes)} likes · “${p.caption?.slice(0, 70) ?? ''}”`;
-    col.innerHTML = `<div class="perf-bar${peak ? ' peak' : ''}" style="--h:${h}%"></div><small>${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })}</small>`;
-    col.addEventListener('click', () => window.open(p.url, '_blank', 'noopener'));
-    chart.appendChild(col);
-    const bar = $('.perf-bar', col);
-    requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.height = h + '%'; }));
-  }
-  $('#perf-more').addEventListener('click', () => openDrill('posts'));
+/* ---------------- Post Performance (bottom section, self-fetching, hourly) ----
+   Renders the views-trend chart + content-type bars + stat cards from the REAL
+   scraped data (data.json posts + agents.json analyst). Re-fetches its own data
+   and re-renders every hour; the two numeric stats count up as a "refreshed" cue.
+   The bar fills (.pp-hbf/.pp-cmpf) MUST be display:block (set in CSS) or their
+   width collapses to 0. */
+let perfTimer = null;
+const PP_BLUES = ['#4a80e0', '#3f70d0', '#3562bd', '#2d54a4', '#244584']; // brightest -> deepest by rank
+const WD_FULL = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
+
+// classify one of the account's own posts into a content type from its caption
+function hookTypeOf(caption) {
+  const c = (caption || '').toLowerCase();
+  if (/\?/.test(caption || '')) return 'Question';
+  if (/😂|🤣|😭|💀|lol|lmao|when you|\bpov\b|nobody|me trying|relatable|be like/.test(c)) return 'Humor';
+  if (/how to|how i|\btips?\b|\d+\s*(ways|things|tips|steps)|guide|mistake|drill|\bform\b|workout/.test(c)) return 'Tip';
+  if (/\bi'?m\b|\bi'?ve\b|\bmy\b|\bme\b|started|journey|\bstory\b|building|why i/.test(c)) return 'Story';
+  return 'Motivation';
 }
 
-function renderTop() {
-  const list = $('#top-list');
-  list.innerHTML = '';
-  for (const p of DATA.me.posts.slice(0, 5)) {
-    const li = el('li');
-    li.innerHTML = `<a href="${esc(p.url)}" target="_blank" rel="noopener"><span class="rank"></span><span class="top-cap">${esc(p.caption?.slice(0, 70) || '(no caption)')}</span><span class="top-views">${fmt(p.views)}</span></a>`;
-    list.appendChild(li);
-  }
+// Derive the whole performance data-contract from the real scraped data.
+function computePerformance(data, agents) {
+  const me = data.me;
+  const posts = (me.posts || []).filter((p) => p.views != null);
+  const chrono = [...posts].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  const recentPosts = chrono.slice(-12).map((p) => ({
+    date: new Date(p.timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+    views: p.views,
+  }));
+
+  const buckets = {};
+  for (const p of posts) { const t = hookTypeOf(p.caption); (buckets[t] = buckets[t] || []).push(p.views); }
+  const contentTypes = Object.entries(buckets)
+    .map(([name, arr]) => ({ name, avgViews: Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) }))
+    .sort((a, b) => b.avgViews - a.avgViews).slice(0, 5);
+
+  const dn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const byDay = {};
+  for (const p of posts) { const d = dn[new Date(p.timestamp).getDay()]; (byDay[d] = byDay[d] || []).push(p.views); }
+  const weekdayViews = order.map((d) => ({ day: d, views: byDay[d] && byDay[d].length ? Math.round(byDay[d].reduce((a, b) => a + b, 0) / byDay[d].length) : 0 }));
+  const bestShort = weekdayViews.reduce((m, d) => (d.views > m.views ? d : m), weekdayViews[0]).day;
+
+  const m = (agents.analyst && agents.analyst.metrics) || {};
+  const median = m.medianViews || 0;
+  const topCT = contentTypes[0] || { name: 'Value', avgViews: median };
+  return {
+    recentPosts,
+    contentTypes,
+    stats: {
+      bestDay: WD_FULL[bestShort] || bestShort,
+      weekdayViews,
+      topHook: topCT.name,
+      topHookMultiplier: median ? +(topCT.avgViews / median).toFixed(1) : 1,
+      medianViews: median,
+      reachMultiplier: m.viewsPerFollower || 0,
+      followers: me.followers || 0,
+    },
+  };
+}
+
+// Self-fetch: re-read the real data files (served build) or use the inlined data
+// (shared build). Silent on failure; keeps the last good render.
+async function fetchPerformance() {
+  if (window.__SHARED__) return computePerformance(DATA, AGENTS);
+  try {
+    const [d, a] = await Promise.all([
+      fetch('data.json').then((r) => r.json()),
+      fetch('agents.json').then((r) => r.json()),
+    ]);
+    return computePerformance(d, a);
+  } catch (e) { return computePerformance(DATA, AGENTS); }
+}
+
+function countUp(node, to, decimals, suffix) {
+  if (!node) return;
+  const t0 = Date.now(), dur = 1100;
+  clearInterval(node._ci);
+  node._ci = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / dur), e = 1 - Math.pow(1 - p, 3), v = to * e;
+    node.textContent = (decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString('en-US')) + (suffix || '');
+    if (p >= 1) clearInterval(node._ci);
+  }, 33);
+}
+
+function renderPerformance(data) {
+  const r = data.recentPosts, n = r.length;
+  if (n < 2) return;
+  const vals = r.map((p) => p.views);
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const niceMax = Math.max(1000, Math.ceil(max / 1000) * 1000);
+  const X = (i) => (i / (n - 1)) * 100;
+  const Y = (v) => 100 - (v / niceMax) * 100;
+
+  $('#perf-yax').innerHTML = [0, 1, 2, 3].map((k) => {
+    const t = k * (niceMax / 3);
+    return `<div class="pp-ytick" style="top:${(100 - (t / niceMax) * 100).toFixed(1)}%">${Math.round(t).toLocaleString('en-US')}</div>`;
+  }).join('');
+
+  const line = r.map((p, i) => `${X(i).toFixed(1)},${Y(p.views).toFixed(1)}`).join(' ');
+  const pts = r.map((p, i) => {
+    const cls = p.views === max ? 'pp-pt pk' : p.views === min ? 'pp-pt lo' : 'pp-pt';
+    return `<div class="${cls}" style="left:${X(i).toFixed(1)}%;top:${Y(p.views).toFixed(1)}%"></div>`;
+  }).join('');
+  const annos = r.map((p, i) => ({ p, i })).filter((o) => o.p.views === max || o.p.views === min).map((o) => {
+    const pk = o.p.views === max;
+    return `<div class="pp-al ${pk ? 'pk' : 'lo'}" style="left:${X(o.i).toFixed(1)}%;top:${Y(o.p.views).toFixed(1)}%"><div class="pp-alk">${pk ? 'Peak' : 'Low'}</div><div class="pp-alv">${fmt(o.p.views)}</div><div class="pp-ald">${esc(o.p.date)}</div></div>`;
+  }).join('');
+  $('#perf-plot').innerHTML = `
+    <svg class="pp-area" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs><linearGradient id="pp-tg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgba(77,134,247,.34)"></stop><stop offset="1" stop-color="rgba(77,134,247,0)"></stop>
+      </linearGradient></defs>
+      <polygon points="${line} 100,100 0,100" fill="url(#pp-tg)"></polygon>
+      <polyline class="pp-aline" points="${line}" vector-effect="non-scaling-stroke"></polyline>
+    </svg>${pts}${annos}`;
+  $('#perf-first').textContent = r[0].date;
+  $('#perf-last').textContent = r[n - 1].date;
+
+  const tmax = Math.max(...data.contentTypes.map((t) => t.avgViews), 1);
+  $('#perf-types').innerHTML = data.contentTypes.map((t, i) => `
+    <div class="pp-hb"><span class="pp-hbl">${esc(t.name)}</span><span class="pp-hbt">
+      <span class="pp-hbf" style="width:${Math.round(t.avgViews / tmax * 100)}%;background:${PP_BLUES[i % PP_BLUES.length]}"></span>
+      <span class="pp-hbv">${fmt(t.avgViews)}</span></span></div>`).join('');
+
+  const s = data.stats;
+  const wkMax = Math.max(...s.weekdayViews.map((d) => d.views), 1);
+  const bestIdx = s.weekdayViews.findIndex((d) => d.views === wkMax);
+  const wkBars = s.weekdayViews.map((d, i) => `<i class="${i === bestIdx ? 'hi' : ''}" style="height:${Math.max(6, Math.round(d.views / wkMax * 100))}%"></i>`).join('');
+  const medPct = Math.round(100 / (s.topHookMultiplier || 1));
+  const markerPct = max > min ? Math.round((s.medianViews - min) / (max - min) * 100) : 50;
+
+  $('#perf-stats').innerHTML = `
+    <div class="pp-st">
+      <div class="pp-stl">Best day</div><div class="pp-stv">${esc(s.bestDay)}</div><div class="pp-sts">avg ${fmt(wkMax)} views</div>
+      <div class="pp-wk">${wkBars}</div>
+    </div>
+    <div class="pp-st">
+      <div class="pp-stl">Top hook</div><div class="pp-stv">${esc(s.topHook)}</div><div class="pp-sts">${s.topHookMultiplier}× your median</div>
+      <div class="pp-cmp">
+        <div class="pp-cmpr"><span class="pp-cmpk">Median</span><span class="pp-cmpt"><span class="pp-cmpf med" style="width:${medPct}%"></span></span></div>
+        <div class="pp-cmpr"><span class="pp-cmpk">${esc(s.topHook)}</span><span class="pp-cmpt"><span class="pp-cmpf hook"></span></span></div>
+      </div>
+    </div>
+    <div class="pp-st">
+      <div class="pp-stl">Median views</div><div class="pp-stv" id="perf-median">0</div><div class="pp-sts">per post</div>
+      <div class="pp-mln"><span class="pp-mmk" style="left:${Math.max(0, Math.min(100, markerPct))}%"></span></div>
+    </div>
+    <div class="pp-st">
+      <div class="pp-radar"><b></b></div>
+      <div class="pp-stl">Reach</div><div class="pp-stv" id="perf-reach">0.0×</div><div class="pp-sts">of ${fmt(s.followers)} followers</div>
+    </div>`;
+
+  countUp($('#perf-median'), s.medianViews, 0, '');
+  countUp($('#perf-reach'), s.reachMultiplier, 1, '×');
+}
+
+async function loadPerformance() {
+  try { renderPerformance(await fetchPerformance()); }
+  catch (e) { console.error('performance render failed', e); }
 }
 
 /* ---------------- drill panel ---------------- */
