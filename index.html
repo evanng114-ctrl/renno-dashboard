@@ -1037,9 +1037,10 @@ async function init() {
   renderGreeting();
   renderStats();
   renderAgents();
-  loadPerformance();
-  // Post Performance fetches its own data and refreshes hourly (per the handoff).
-  if (!perfTimer) perfTimer = setInterval(loadPerformance, 60 * 60 * 1000);
+  renderPerformance(computePerformance(DATA, AGENTS));
+  // Keep ALL numbers current: re-fetch the data and re-render everything hourly
+  // (picks up a fresh scrape/regenerate without a manual page reload).
+  if (!refreshTimer) refreshTimer = setInterval(refreshAll, 60 * 60 * 1000);
 }
 
 /* ---------------- greeting hero ---------------- */
@@ -1259,7 +1260,7 @@ function renderAgents() {
    and re-renders every hour; the two numeric stats count up as a "refreshed" cue.
    The bar fills (.pp-hbf/.pp-cmpf) MUST be display:block (set in CSS) or their
    width collapses to 0. */
-let perfTimer = null;
+let refreshTimer = null;
 const PP_BLUES = ['#4a80e0', '#3f70d0', '#3562bd', '#2d54a4', '#244584']; // brightest -> deepest by rank
 const WD_FULL = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
 
@@ -1316,15 +1317,26 @@ function computePerformance(data, agents) {
 
 // Self-fetch: re-read the real data files (served build) or use the inlined data
 // (shared build). Silent on failure; keeps the last good render.
-async function fetchPerformance() {
-  if (window.__SHARED__) return computePerformance(DATA, AGENTS);
-  try {
-    const [d, a] = await Promise.all([
-      fetch('data.json').then((r) => r.json()),
-      fetch('agents.json').then((r) => r.json()),
-    ]);
-    return computePerformance(d, a);
-  } catch (e) { return computePerformance(DATA, AGENTS); }
+// Re-fetch the source data and re-render EVERY section, so all numbers stay current
+// as soon as new data lands (hourly, or whenever the data files change). In the
+// shared build there's no server to re-fetch, so it just re-renders (which also
+// rolls the Attract/Trust/Sell day over at midnight). Silent on fetch failure.
+async function refreshAll() {
+  if (!window.__SHARED__) {
+    try {
+      const bust = '?t=' + Date.now(); // bypass the browser cache so we actually get fresh data
+      const [d, a] = await Promise.all([
+        fetch('data.json' + bust).then((r) => r.json()),
+        fetch('agents.json' + bust).then((r) => r.json()),
+      ]);
+      DATA = d; AGENTS = a; deepDeDash(DATA); deepDeDash(AGENTS);
+    } catch (e) { console.error('hourly refresh failed, keeping last data', e); }
+  }
+  TODAY = computeToday();
+  renderGreeting();
+  renderStats();
+  renderAgents();
+  renderPerformance(computePerformance(DATA, AGENTS));
 }
 
 function countUp(node, to, decimals, suffix) {
@@ -1408,11 +1420,6 @@ function renderPerformance(data) {
 
   countUp($('#perf-median'), s.medianViews, 0, '');
   countUp($('#perf-reach'), s.reachMultiplier, 1, '×');
-}
-
-async function loadPerformance() {
-  try { renderPerformance(await fetchPerformance()); }
-  catch (e) { console.error('performance render failed', e); }
 }
 
 /* ---------------- drill panel ---------------- */
